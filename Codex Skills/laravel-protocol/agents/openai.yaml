@@ -1,0 +1,4 @@
+interface:
+  display_name: "Laravel 11 Protocol"
+  short_description: "Laravel 11 workflow and delivery guardrails"
+  default_prompt: "Use $laravel-11-ai-protocol to implement or modify a Laravel 11 feature while obeying the Go! gate and delivery rules."

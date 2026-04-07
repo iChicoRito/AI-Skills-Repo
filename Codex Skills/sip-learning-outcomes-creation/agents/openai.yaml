@@ -1,0 +1,4 @@
+interface:
+  display_name: "SIP Learning Outcomes"
+  short_description: "Create strict SIP learning outcomes DOCX"
+  default_prompt: "Use $sip-learning-outcomes to create the SIP Learning Outcomes section from my term-based source content."
