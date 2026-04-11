@@ -17,6 +17,7 @@ Use this file as the detailed rules reference for the `laravel-11-ai-protocol` s
 ## Execution gate
 
 - Treat `Go!` as the execution trigger.
+- Treat only the exact token `Go!` as implementation approval unless the user explicitly says another phrase is equivalent.
 - Before `Go!`, allow only:
   - reading and analyzing provided content
   - confirming understanding
@@ -27,11 +28,20 @@ Use this file as the detailed rules reference for the `laravel-11-ai-protocol` s
   - perform implementation tasks
 - After `Go!`, do all of the following:
   - execute objectives exactly as specified
-  - follow Laravel coding standards strictly
+  - follow the user's project conventions strictly
+  - follow Laravel framework behavior unless the user explicitly overrides it
   - follow naming conventions strictly
   - avoid deviating from the instructions
 
 ## Database rules
+
+### Schema reference folder
+
+- When direct database access is not available, use the `database/schema` folder as the source of truth for schema inspection and reference.
+- Treat the files in `database/schema` as reference-only representations of the current database structure.
+- Use the schema reference files to understand existing tables, columns, indexes, relationships, and constraints before planning database-related changes.
+- Do not treat `database/schema` files as a replacement for real Laravel migrations.
+- Whenever a real migration adds, edits, drops, renames, or removes database structures, update the corresponding file in `database/schema` so the reference stays synchronized with the actual schema.
 
 ### New databases or tables
 
@@ -48,15 +58,15 @@ Reasons:
 
 ### Updating existing tables
 
-- Prefer direct SQL queries for small structural changes such as:
+- Prefer Laravel migrations for structural table changes, including:
+- Require Laravel migrations for all structural table changes, regardless of scope, size, or urgency, including:
   - adding columns
   - dropping columns
   - altering field types or attributes
-- Document all SQL queries clearly with comments.
-- Use migrations instead when:
-  - changes affect multiple environments
-  - changes must be version-controlled
-  - changes are complex or involve multiple tables
+  - renaming columns or indexes
+- Continue using Artisan-generated migration files instead of manually creating them.
+- Do not use direct SQL for schema changes.
+- If Laravel's schema builder alone is insufficient, still deliver the change through a migration file using the appropriate database statements inside the migration.
 
 ## Models
 
@@ -109,15 +119,19 @@ Examples:
 - Use either:
   - Laravel `FormRequest` classes
   - inline `$request->validate()`
+- Prefer `FormRequest` classes for non-trivial create/update flows.
 - Apply specific validation rules per field.
 - Avoid vague validation messages.
 - Provide clear, user-friendly custom messages.
 - Use SweetAlert2 to show validation errors and alerts to the user.
+- Authorize sensitive actions such as create, update, delete, admin access, and protected resource access.
+- Wrap multi-step write operations in `DB::transaction()` when partial completion would leave inconsistent data.
 
 ### AJAX integration
 
-- Use jQuery + AJAX for all form submissions.
-- Return JSON responses only.
+- Use jQuery + AJAX for Blade-based CRUD form submissions unless the existing project already uses another frontend pattern or the user requests normal form posting.
+- Return JSON responses for AJAX submit handlers.
+- Use proper HTTP status codes together with the JSON body when possible.
 - Use this response structure:
 
 Success response:
@@ -139,6 +153,20 @@ Error response:
 }
 ```
 
+Validation error example:
+
+```json
+{
+  "status": "error",
+  "message": "Please correct the highlighted fields.",
+  "errors": {
+    "name": [
+      "The name field is required."
+    ]
+  }
+}
+```
+
 ## Views
 
 ### UI consistency
@@ -148,10 +176,12 @@ Error response:
 
 ### AJAX form handling
 
-- Use jQuery + AJAX for all form submissions.
+- Use jQuery + AJAX for Blade-based CRUD forms unless the project already follows another frontend convention.
 - Provide real-time validation feedback.
 - Prevent default form submission.
 - Display success and error states with SweetAlert2.
+- Include CSRF protection for AJAX requests.
+- Show loading states while a request is in progress.
 
 Success SweetAlert2:
 
@@ -227,6 +257,7 @@ Examples:
 - Keep routes synchronized with controller methods.
 - Ensure every route maps to a matching controller method.
 - Remove or update routes immediately when controller methods change.
+- Use route model binding where it improves readability and reduces manual lookup code.
 
 ## Migrations and file creation
 
@@ -243,6 +274,11 @@ Commands:
 - request: `php artisan make:request {RequestName}`
 - seeder: `php artisan make:seeder {SeederName}`
 - factory: `php artisan make:factory {FactoryName}`
+
+Preference:
+
+- generate `FormRequest` classes for non-trivial validation flows
+- keep generated namespaces and default Laravel structure intact
 
 ### Deliverable requirements
 
@@ -274,6 +310,7 @@ When providing instructions that involve file creation, always include:
 - Provide only the modified blocks.
 - Identify the modified function or section clearly.
 - Include surrounding context lines only when needed.
+- When working directly in the repository, make the edits in place and summarize the changed files clearly.
 
 ### Simplification
 
@@ -309,9 +346,9 @@ When providing instructions that involve file creation, always include:
 
 ### Security
 
-- Sanitize and validate all user input before processing.
+- Validate all user input before processing.
 - Never trust raw user input.
-- Use Laravel built-in validation and sanitization tools.
+- Use Laravel built-in validation, authorization, casting, escaping, and storage tools.
 
 ### Code quality
 
@@ -319,3 +356,28 @@ When providing instructions that involve file creation, always include:
 - Avoid redundant logic.
 - Keep methods focused on a single responsibility.
 - Use descriptive variable and method names.
+- Use eager loading when rendering related data to avoid N+1 query issues.
+- Use pagination for large listing pages instead of loading everything at once.
+
+### File uploads
+
+- Validate uploaded files by type, size, and required presence.
+- Store uploads using Laravel's storage APIs instead of manual path handling.
+- Use predictable storage locations and filenames that avoid collisions.
+- Clean up or replace obsolete files when updates remove the old asset.
+
+### Logging and failures
+
+- Return user-friendly error messages in the UI.
+- Log unexpected exceptions when the application needs diagnostic visibility.
+
+### Soft deletes
+
+- Use soft deletes when records should remain recoverable or auditable.
+
+### Anti-patterns to avoid
+
+- Do not place business logic in Blade templates.
+- Do not use raw SQL for normal CRUD flows when Eloquent or the query builder is sufficient.
+- Do not duplicate validation rules across multiple layers without reason.
+- Do not leave routes and controller methods out of sync.

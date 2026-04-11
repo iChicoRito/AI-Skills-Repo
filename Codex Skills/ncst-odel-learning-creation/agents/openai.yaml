@@ -1,0 +1,4 @@
+interface:
+  display_name: "NCST ODeL Learning Template"
+  short_description: "Create strict NCST ODeL course templates"
+  default_prompt: "Use $ncst-odel-learning-template to create an NCST ODeL Learning Template from the course materials I provide."
