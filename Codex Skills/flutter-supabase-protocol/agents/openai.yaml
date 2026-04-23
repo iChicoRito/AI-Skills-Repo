@@ -1,0 +1,4 @@
+interface:
+  display_name: "Flutter Supabase Protocol"
+  short_description: "Follow a strict Flutter + Supabase protocol"
+  default_prompt: "Use $flutter-supabase-protocol to implement this Flutter + Supabase task under the required protocol and wait for 'Go!' before generating code."

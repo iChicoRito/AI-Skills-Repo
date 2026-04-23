@@ -1,0 +1,5 @@
+interface:
+  display_name: "Lecture Slides and Lesson Plans"
+  short_description: "Generate consistent weekly lecture content"
+  default_prompt: "Use $lecture-slides-lesson-plans to generate text-only weekly lecture content from my topic, scope, and Week 1 sample structure."
+

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Expo Gluestack Supabase Protocol"
+  short_description: "Follow a strict Expo mobile project protocol"
+  default_prompt: "Use $expo-gluestack-supabase-protocol to implement this React Native + Expo + Gluestack UI + Supabase task under the required protocol and wait for 'Go!' before generating code."

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Flutter Design Tokens"
+  short_description: "Apply Flutter UI token mappings."
+  default_prompt: "Use $flutter-design-tokens to apply the UI color and typography token mapping."

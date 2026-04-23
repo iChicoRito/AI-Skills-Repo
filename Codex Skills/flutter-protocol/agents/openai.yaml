@@ -1,0 +1,4 @@
+interface:
+  display_name: "Flutter Protocol"
+  short_description: "Follow a strict Flutter project protocol"
+  default_prompt: "Use $flutter-protocol to implement this Flutter task under the required protocol and wait for 'Go!' before generating code."

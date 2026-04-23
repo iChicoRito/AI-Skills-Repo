@@ -1,0 +1,4 @@
+interface:
+  display_name: "Module Creator"
+  short_description: "Create strict academic module DOCX files"
+  default_prompt: "Use $module-creator to create a term-organized module DOCX from my provided content."

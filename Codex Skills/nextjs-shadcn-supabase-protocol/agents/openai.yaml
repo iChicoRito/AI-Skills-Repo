@@ -1,0 +1,4 @@
+interface:
+  display_name: "Next.js shadcn Supabase Protocol"
+  short_description: "Follow a strict Next.js project protocol"
+  default_prompt: "Use $nextjs-shadcn-supabase-protocol to implement this Next.js + shadcn/ui + Supabase task under the required protocol and wait for 'Go!' before generating code."
