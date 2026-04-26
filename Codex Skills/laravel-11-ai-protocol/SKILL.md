@@ -57,8 +57,9 @@ Read [references/laravel-protocol.md](references/laravel-protocol.md) when you n
 
 - model naming and docblocks
 - controller validation and JSON structure
+- `FormRequest` defaults, Policies, and service/action workflow boundaries
 - Blade, jQuery AJAX, and SweetAlert2 behavior
 - schema changes that must always use migrations
 - `database/schema` usage when direct database access is not available
-- route naming and synchronization
-- PSR-12, authorization, transactions, performance, security, and deliverable formatting
+- route naming, route model binding, and synchronization
+- API Resources, queues, caching, feature tests, PSR-12, authorization, transactions, performance, security, and deliverable formatting

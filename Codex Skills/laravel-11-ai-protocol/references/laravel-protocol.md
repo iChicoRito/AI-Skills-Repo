@@ -8,8 +8,12 @@ Use this file as the detailed rules reference for the `laravel-11-ai-protocol` s
 - [Database rules](#database-rules)
 - [Models](#models)
 - [Controllers](#controllers)
+- [Services and actions](#services-and-actions)
 - [Views](#views)
 - [Routes](#routes)
+- [API resources](#api-resources)
+- [Performance and async work](#performance-and-async-work)
+- [Testing](#testing)
 - [Migrations and file creation](#migrations-and-file-creation)
 - [Code delivery rules](#code-delivery-rules)
 - [General coding style](#general-coding-style)
@@ -119,11 +123,13 @@ Examples:
 - Use either:
   - Laravel `FormRequest` classes
   - inline `$request->validate()`
-- Prefer `FormRequest` classes for non-trivial create/update flows.
+- Use `FormRequest` classes by default for `store` and `update` actions.
+- Reserve inline `$request->validate()` for very small or exceptional cases.
 - Apply specific validation rules per field.
 - Avoid vague validation messages.
 - Provide clear, user-friendly custom messages.
 - Use SweetAlert2 to show validation errors and alerts to the user.
+- Use the `authorize()` method inside `FormRequest` when request-level authorization is appropriate.
 - Authorize sensitive actions such as create, update, delete, admin access, and protected resource access.
 - Wrap multi-step write operations in `DB::transaction()` when partial completion would leave inconsistent data.
 
@@ -166,6 +172,37 @@ Validation error example:
   }
 }
 ```
+
+### Authorization
+
+- Use Laravel Policies by default for resource-based authorization.
+- Keep authorization checks close to the resource action by using controller helpers such as `authorize()` and `authorizeResource()` where appropriate.
+- Use Gates or middleware for broader application access rules when Policies are not the right fit.
+- Avoid scattering custom permission logic across unrelated controllers or views.
+
+## Services and actions
+
+### Business workflow separation
+
+- Use service classes or action classes for multi-step business workflows.
+- Keep controllers focused on request handling, validation flow, authorization, and response formatting.
+- Keep models focused on relationships, casts, scopes, and small domain helpers.
+- Do not place large business processes directly inside controllers, models, or Blade templates.
+
+### Typical use cases
+
+- Use services/actions for workflows such as:
+  - create/update flows with related records
+  - inventory adjustments
+  - payment or billing steps
+  - approval flows
+  - import/export orchestration
+  - any process with side effects or multiple persistence steps
+
+### Transaction boundaries
+
+- Wrap service/action workflows in `DB::transaction()` when partial completion would leave inconsistent state.
+- Keep transaction scope as small as practical while still preserving integrity.
 
 ## Views
 
@@ -257,7 +294,61 @@ Examples:
 - Keep routes synchronized with controller methods.
 - Ensure every route maps to a matching controller method.
 - Remove or update routes immediately when controller methods change.
-- Use route model binding where it improves readability and reduces manual lookup code.
+- Use route model binding by default when resolving Eloquent models from route parameters.
+- Avoid manual `find()` or `findOrFail()` lookups in controllers when route model binding can express the intent cleanly.
+
+## API resources
+
+### JSON response formatting
+
+- Use Laravel API Resources for structured JSON responses beyond very simple success/error AJAX payloads.
+- Keep response shaping out of controllers when returning model data or collections.
+- Use API Resources to standardize field names, nested relationships, and conditional attributes.
+- Avoid returning raw model instances directly for public-facing APIs unless the response is intentionally trivial.
+
+### Consistency
+
+- Keep API response formats consistent across related endpoints.
+- Use dedicated resource classes for single-item and collection responses when helpful.
+
+## Performance and async work
+
+### Queue slow tasks
+
+- Queue slow or non-blocking work such as:
+  - emails
+  - notifications
+  - imports and exports
+  - report generation
+  - media processing
+  - third-party API follow-up tasks
+- Keep HTTP requests fast by offloading background work to queues when the user does not need an immediate inline result.
+
+### Cache expensive reads
+
+- Cache expensive read-heavy queries and computed aggregates when the data is reused frequently.
+- Consider caching for dashboards, settings, lookup lists, report summaries, and other repeated reads.
+- Invalidate or refresh cache entries deliberately when write operations change the underlying data.
+- Do not add caching blindly to highly dynamic queries without a clear invalidation strategy.
+
+### Query efficiency
+
+- Use eager loading intentionally to avoid N+1 query issues.
+- Select only the needed columns for heavier queries when practical.
+- Extract repeated filters into local scopes or query objects when the same query logic appears in multiple places.
+
+## Testing
+
+### Feature tests
+
+- Add Feature tests for new features by default.
+- Add regression-oriented Feature tests for bug fixes when practical.
+- Prefer Feature tests for request/response flows, authorization checks, validation behavior, and database side effects.
+
+### Unit tests
+
+- Add Unit tests for isolated domain or helper logic when the behavior is complex enough to benefit from focused coverage.
+- Keep test intent clear and aligned with the behavior being protected.
 
 ## Migrations and file creation
 
@@ -349,6 +440,7 @@ When providing instructions that involve file creation, always include:
 - Validate all user input before processing.
 - Never trust raw user input.
 - Use Laravel built-in validation, authorization, casting, escaping, and storage tools.
+- Prefer Policies for resource authorization and `FormRequest` classes for request validation and request-level authorization.
 
 ### Code quality
 
@@ -358,6 +450,7 @@ When providing instructions that involve file creation, always include:
 - Use descriptive variable and method names.
 - Use eager loading when rendering related data to avoid N+1 query issues.
 - Use pagination for large listing pages instead of loading everything at once.
+- Use services/actions for multi-step workflows, API Resources for structured JSON, queues for slow tasks, and caching for expensive repeated reads when appropriate.
 
 ### File uploads
 
